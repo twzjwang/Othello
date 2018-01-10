@@ -1,222 +1,228 @@
 #include "game.h"
 
+//set starting position
 void init_board()
 {
-    black_num = 0;
-    white_num = 0;
-    memset(board, sizeof(board), 0);
-    gameover = 0;
-    board[3][3] = 2;
-    board[4][4] = 2;
-    board[3][4] = 1;
-    board[4][3] = 1;
-    turn = 1;
+    int i;
+    for (i = 0; i < 64; i++)
+        board[i] = ' ';
+    board[27] = 'o';
+    board[28] = 'x';
+    board[35] = 'x';
+    board[36] = 'o';
+    
+    turn = 0;
+    is_gameover = 0;
 }
 
+//print current position
 void print_board()
 {
-    int i, j, tmp;
-    black_num = 0;
-    white_num = 0;
-    for (i = 0; i < 8; i++)
-        for (j = 0; j < 8; j++) {
-            if (board[i][j] == 1)
-                black_num++;
-            else if (board[i][j] == 2)
-                white_num++;
-        }
-    printf("\033[H\033[J");
-    printf("Black : %d vs %d White\n\n", black_num, white_num);
-    printf("   1 2 3 4 5 6 7 8\n");
-    printf("  -----------------\n");
-    for (i = 0; i < 8; i++) {
-        printf("%c |", i + 97);
-        for (j = 0; j < 8; j++) {
-            tmp = board[i][j];
-            if (!tmp)
-                printf(" |");
-            else if (tmp == -1)
-                printf("*|");
-            else if (tmp == 1)
-                printf("X|");
-            else
-                printf("O|");
-        }
-        printf("\n");
-    }
-    printf("  -----------------\n\n");
-    
-}
-
-int move_pos()
-{
-    int i, j, x, y;
-    int result = 0;
-    for (i = 0; i < 8; i++) {
-        for (j = 0; j < 8; j++) {
-            if (board[i][j] <= 0) {
-                for (x = i - 1; x >= -1 && (board[x][j] + turn) == 3; x--);
-                if (x < i - 1 && x > -1 && board[x][j] == turn) {
-                    board[i][j] = -1;
-                    result++;
-                    continue;
-                }
-                
-                for (x = i + 1; x <= 8 && (board[x][j] + turn) == 3; x++);
-                if (x > i + 1 && x < 8 && board[x][j] == turn) {
-                    board[i][j] = -1;
-                    result++;
-                    continue;
-                }
-
-                for (y = j - 1; y >= -1 && (board[i][y] + turn) == 3; y--);
-                if (y < j - 1 && y > -1 && board[i][y] == turn) {
-                    board[i][j] = -1;
-                    result++;
-                    continue;
-                }
-
-                for (y = j + 1; y <= 8 && (board[i][y] + turn) == 3; y++);
-                if (y > j + 1 && y < 8 && board[i][y] == turn) {
-                    board[i][j] = -1;
-                    result++;
-                    continue;
-                }
-
-                for (x = i - 1, y = j - 1; x >= -1 && y >= -1 && (board[x][y] + turn) == 3; x--, y--);
-                if (x < i - 1 && x > -1 && y < j - 1 && y > -1 && board[x][y] == turn) { 
-                    board[i][j] = -1;
-                    result++;
-                    continue;
-                }
-
-                for (x = i - 1, y = j + 1; x >= -1 && y <= 8 && (board[x][y] + turn) == 3; x--, y++);
-                if (x < i - 1 && x > -1 && y > j + 1 && y < 8 && board[x][y] == turn) { 
-                    board[i][j] = -1;
-                    result++;
-                    continue;
-                }
-
-                for (x = i + 1, y = j - 1; x <= 8 && y >= -1 && (board[x][y] + turn) == 3; x++, y--);
-                if (x > i + 1 && x < 8 && y < j - 1 && y > -1 && board[x][y] == turn) { 
-                    board[i][j] = -1;
-                    result++;
-                    continue;
-                }
-
-                for (x = i + 1, y = j + 1; x <= 8 && y <= 8 && (board[x][y] + turn) == 3; x++, y++);
-                if (x > i + 1 && x < 8 && y > j + 1 && y < 8 && board[x][y] == turn) { 
-                    board[i][j] = -1;
-                    result++;
-                    continue;
-                }
-
-
-
-                board[i][j] = 0;
-            }
-        }
-    }
-    return result;
-}
-
-void reverse(int i, int j)
-{
-    int x, y;
-
-    for (x = i - 1; x >= -1 && (board[x][j] + turn) == 3; x--);
-    if (x < i - 1 && x > -1 && board[x][j] == turn) {
-        for (; x < i; x++)
-            board[x][j] = turn;
-    }
-
-    for (x = i + 1; x <= 8 && (board[x][j] + turn) == 3; x++);
-    if (x > i + 1 && x < 8 && board[x][j] == turn) {
-        for (; x > i; x--)
-            board[x][j] = turn;
-    }
-
-    for (y = j - 1; y >= -1 && (board[i][y] + turn) == 3; y--);
-    if (y < j - 1 && y > -1 && board[i][y] == turn) {
-        for (; y < j; y++)
-            board[i][y] = turn;
-    }
-
-    for (y = j + 1; y <= 8 && (board[i][y] + turn) == 3; y++);
-    if (y > j + 1 && y < 8 && board[i][y] == turn) {
-        for (; y > j; y--)
-            board[i][y] = turn;
-    }
-
-    for (x = i - 1, y = j - 1; x >= -1 && y >= -1 && (board[x][y] + turn) == 3; x--, y--);
-    if (x < i - 1 && x > -1 && y < j - 1 && y > -1 && board[x][y] == turn) { 
-        for (; x < i && y < j; x++, y++)
-            board[x][y] = turn;
-    }
-
-    for (x = i - 1, y = j + 1; x >= -1 && y <= 8 && (board[x][y] + turn) == 3; x--, y++);
-    if (x < i - 1 && x > -1 && y > j + 1 && y < 8 && board[x][y] == turn) { 
-        for (; x < i && y > j; x++, y--)
-            board[x][y] = turn;
-    }
-
-    for (x = i + 1, y = j - 1; x <= 8 && y >= -1 && (board[x][y] + turn) == 3; x++, y--);
-    if (x > i + 1 && x < 8 && y < j - 1 && y > -1 && board[x][y] == turn) {
-        for (; x > i && y < j; x--, y++)
-            board[x][y] = turn;
-
-    }
-
-    for (x = i + 1, y = j + 1; x <= 8 && y <= 8 && (board[x][y] + turn) == 3; x++, y++);
-    if (x > i + 1 && x < 8 && y > j + 1 && y < 8 && board[x][y] == turn) {
-        for (; x > i && y > j; x--, y--)
-            board[x][y] = turn;
-    }
-}
-
-void next_move()
-{
-    if (turn == 1)
-        printf("It's Black's turn!\nmove : ");
-    else
-        printf("It's White's turn!\nmove : ");
-    
+    int i, d;
     char c;
-    int i, j;
-    
-    while (1) {
+    black_score = 0;
+    white_score = 0;
+    for (i = 0; i < 64; i++) {
+        if (board[i] == 'x')
+            black_score++;
+        else if (board[i] == 'o')
+            white_score++;
+    }
+
+    printf("\033[H\033[J");
+
+    printf("Black  ");
+    if (is_black_ai)
+        printf("AI");
+    else
+        printf("Player");
+    printf(" %-2d vs %2d ", black_score, white_score);
+    if (is_white_ai)
+        printf("AI");
+    else
+        printf("Player");    
+    printf("  White\n\n");
+    if (!turn)
+        printf("            Black's move\n\n");
+    else
+        printf("            White's move\n\n");
+
+    printf("    a   b   c   d   e   f   g   h \n");
+    printf("  --------------------------------- \n");
+    for (i = 1; i <= 8; i++) {
+        printf("%d | %c | %c | %c | %c | %c | %c | %c | %c | %d\n\n", i,
+            board[i*8-8], board[i*8-7], board[i*8-6],
+            board[i*8-5], board[i*8-4], board[i*8-3],
+            board[i*8-2], board[i*8-1], i);
+    }
+    printf("  --------------------------------- \n");
+    printf("    a   b   c   d   e   f   g   h \n\n");
+
+    if (!turn && !is_black_ai) {
+        printf("input your move (e.x. 'd3') : ");
+        scanf("%c%d", &c, &d);
         getchar();
-        scanf("%c%d", &c, &j);
-        i = c-'a';
-        j--;
-        if (i >= 0 && i < 8 && j >= 0 && j < 8 && board[i][j] == -1) {
-            break;
-        }
-        else {
-            printf("wrong position!\n");
-            printf("move : ");
-        }
+        move((c - 'a')  + (d - 1) * 8, 'x');
     }
-    board[i][j] = turn;
-    reverse(i, j);
-    turn = 3 - turn;
+    else if (!turn && is_black_ai) {
+
+    }
+    else if (turn && !is_white_ai) {
+        printf("Input move (e.x. 'd3') : ");
+        do {
+            scanf("%c%d", &c, &d);
+        } while (c < 'a' || c > 'h' || d < 1 || d > 8);
+        getchar();
+        move((c - 'a')  + (d - 1) * 8, 'o');
+    }
+    else {
+
+    }
 }
 
-void start_game()
+//put disc on board
+void move(int index, char color)
 {
-    init_board();
-    while (!gameover) {
-        if (!move_pos()) {
-            turn = 3 - turn;
-            continue;
-        }       
-        print_board();
-        next_move();
+    int i;
+    int mode = 0, temp_id, is_reverse = 0;
+    char reverse_color = (color=='o') ? 'x' : 'o';
+
+    if (board[index] != ' ') {
+        return;
+    }
+
+    //reverse up
+    mode = 0;
+    temp_id = index;
+    while (temp_id - 8 >= 0 && mode < 2) {
+        temp_id -= 8;
+        if (!mode && board[temp_id] == reverse_color)
+            mode++;
+        else if (mode == 1 && board[temp_id] == color) {
+            mode++;
+            is_reverse = 1;        
+        } else if (board[temp_id] == ' ')
+            break;
+    }
+    for (i = temp_id + 8; mode == 2 && i < index; i += 8)
+        board[i] = color;
+
+    //reverse down
+    mode = 0;
+    temp_id = index;
+    while (temp_id + 8 < 64 && mode < 2) {
+        temp_id += 8;
+        if (!mode && board[temp_id] == reverse_color)
+            mode++;
+        else if (mode == 1 && board[temp_id] == color) {
+            mode++;
+            is_reverse = 1;        
+        } else if (board[temp_id] == ' ')
+            break;
+    }
+    for (i = temp_id - 8; mode == 2 && i > index; i -= 8)
+        board[i] = color;
+
+    //reverse left
+    mode = 0;
+    temp_id = index;
+    while (temp_id - 1 >= index / 8 * 8 && mode < 2) {
+        temp_id--;
+        if (!mode && board[temp_id] == reverse_color)
+            mode++;
+        else if (mode == 1 && board[temp_id] == color) {
+            mode++;
+            is_reverse = 1;        
+        } else if (board[temp_id] == ' ')
+            break;
+    }
+    for (i = temp_id + 1; mode == 2 && i < index; i++)
+        board[i] = color;
+
+    //reverse right
+    mode = 0;
+    temp_id = index;
+    while (temp_id + 1 < (index / 8 * 8 + 8) && mode < 2) {
+        temp_id++;
+        if (!mode && board[temp_id] == reverse_color)
+            mode++;
+        else if (mode == 1 && board[temp_id] == color) {
+            mode++;
+            is_reverse = 1;        
+        } else if (board[temp_id] == ' ')
+            break;
+    }
+    for (i = temp_id - 1; mode == 2 && i > index; i--)
+        board[i] = color;
+
+    //reverse upleft
+    mode = 0;
+    temp_id = index;
+    while (temp_id - 9 >= 0 && (temp_id - 9) % 8 < index % 8 && mode < 2) {
+        temp_id -= 9;
+        if (!mode && board[temp_id] == reverse_color)
+            mode++;
+        else if (mode == 1 && board[temp_id] == color) {
+            mode++;
+            is_reverse = 1;        
+        } else if (board[temp_id] == ' ')
+            break;
+    }
+    for (i = temp_id + 9; mode == 2 && i < index; i += 9)
+        board[i] = color;
+
+    //reverse upright
+    mode = 0;
+    temp_id = index;
+    while (temp_id - 7 >= 0 && (temp_id - 7) % 8 > index % 8 && mode < 2) {
+        temp_id -= 7;
+        if (!mode && board[temp_id] == reverse_color)
+            mode++;
+        else if (mode == 1 && board[temp_id] == color) {
+            mode++;
+            is_reverse = 1;        
+        } else if (board[temp_id] == ' ')
+            break;
+    }
+    for (i = temp_id + 7; mode == 2 && i < index; i += 7)
+        board[i] = color;
+
+    //reverse downleft
+    mode = 0;
+    temp_id = index;
+    while (temp_id + 7 >= 0 && (temp_id + 7) % 8 < index % 8 && mode < 2) {
+        temp_id += 7;
+        if (!mode && board[temp_id] == reverse_color)
+            mode++;
+        else if (mode == 1 && board[temp_id] == color) {
+            mode++;
+            is_reverse = 1;        
+        } else if (board[temp_id] == ' ')
+            break;
+    }
+    for (i = temp_id - 7; mode == 2 && i > index; i -= 7)
+        board[i] = color;
+
+    //reverse downright
+    mode = 0;
+    temp_id = index;
+    while (temp_id + 9 >= 0 && (temp_id + 9) % 8 > index % 8 && mode < 2) {
+        temp_id += 9;
+        if (!mode && board[temp_id] == reverse_color)
+            mode++;
+        else if (mode == 1 && board[temp_id] == color) {
+            mode++;
+            is_reverse = 1;        
+        } else if (board[temp_id] == ' ')
+            break;
+    }
+    for (i = temp_id - 9; mode == 2 && i > index; i -= 9)
+        board[i] = color;
+
+    if (is_reverse) {
+        board[index] = color;
+        turn = 1 - turn;
     }
 }
-
-
-
-
 
 
