@@ -15,6 +15,7 @@ void init_board()
     is_gameover = 0;
     black_mobility = 4;
     white_mobility = 4;
+    memset(history, '\0', sizeof(history));
 }
 
 //print current position
@@ -44,8 +45,13 @@ void print_board()
         printf("Player");    
     printf("  White\n");   
     printf("\n");
-    printf("Black mobility %d\n", black_mobility);
-    printf("White mobility %d\n", white_mobility);
+    printf("History : ");
+    for (i = 0; i < 2 * (black_score + white_score - 4); i += 2) {
+        if (i % 20 == 0)
+             printf("\n");   
+        printf(" %c%c", history[i], history[i + 1]);
+    }
+    printf("\n");
     if (!turn)
         printf("\n\n            Black's move\n\n");
     else
@@ -364,6 +370,11 @@ void move(int index, char color)
 
     if (is_reverse) {
         board[index] = color;
+        if (!turn)
+            history[2 * (black_score + white_score - 4)] = (index % 8) + 'A';
+        else
+            history[2 * (black_score + white_score - 4)] = (index % 8) + 'a';
+        history[2 * (black_score + white_score - 4) + 1] = index / 8 + 49;    
         black_mobility = count_mobility('x');
         white_mobility = count_mobility('o');
         if (!black_mobility && !white_mobility) {
