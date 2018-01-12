@@ -2,7 +2,7 @@
 #include <time.h>
 #include "game.h"
 
-int Deep = 4;
+int Deep = 2;
 int valuation_table[64] = {  300, -60, 10, 10, 10, 10, -60,  300,
                             -60, -200,  5,  5,  5,  5, -200, -60,
                              10,   5,  1,  1,  1,  1,   5,  10,
@@ -464,7 +464,7 @@ int main()
 
     while (!is_gameover) {
         print_board();
-        if ((black_score + white_score) % 24 == 0)
+        if ((black_score + white_score) % 14 == 0)
             Deep += 2;
 
         printf("black %d value %d mobility %d\n", evaluation_function(board, 'x'), evaluated_value(board, 'x'), evaluated_mobility(board, 'x'));
