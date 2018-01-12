@@ -2,6 +2,7 @@
 #include <time.h>
 #include "game.h"
 
+int Deep = 4;
 int valuation_table[64] = {  300, -60, 10, 10, 10, 10, -60,  300,
                             -60, -200,  5,  5,  5,  5, -200, -60,
                              10,   5,  1,  1,  1,  1,   5,  10,
@@ -463,6 +464,8 @@ int main()
 
     while (!is_gameover) {
         print_board();
+        if ((black_score + white_score) % 24 == 0)
+            Deep += 2;
 
         printf("black %d value %d mobility %d\n", evaluation_function(board, 'x'), evaluated_value(board, 'x'), evaluated_mobility(board, 'x'));
         printf("white %d value %d mobility %d\n", evaluation_function(board, 'o'), evaluated_value(board, 'o'), evaluated_mobility(board, 'o'));
@@ -484,8 +487,9 @@ int main()
                 }
             }
             if (black_mode){
-                printf("a-b search\n");
+                printf("a-b search deep %d\n", Deep);
                 move(absearch(board, 'x', 0), 'x');
+//getchar();
             }
         }
         else if (turn && !is_white_ai) {
@@ -507,8 +511,9 @@ int main()
                 }
             }
             if (white_mode){
-                printf("a-b search\n");
+                printf("a-b search deep %d\n", Deep);
                 move(absearch(board, 'o', 0), 'o');
+//getchar();
             }
         }
     }
@@ -568,17 +573,25 @@ int absearch(char board[], char color, int deep)
     char reverse_color = (color=='o') ? 'x' : 'o';
     char test_board[64];
     max_value = -99999999;
+    if (deep > Deep)
+        return -evaluation_function(board, color);
 
     for (i = 0; i < 64; i++) {
-        memcpy(test_board, board, strlen(board) + 1);
-        if(!sim_move(test_board, i, color)){
-            temp_value = evaluation_function(test_board, color);
-            if (temp_value > max_value) {
+        strcpy(test_board, board);
+        if(!sim_move(test_board, i, (deep % 2) ? reverse_color : color)){
+//printf("deep %d i %d ", deep , i);
+            temp_value = -absearch(test_board, color, deep + 1);
+//printf("v %d\n", temp_value);
+            if (temp_value >= max_value) {
                 max_value = temp_value;
                 max_pos = i;
             }
         }
     }
+    //printf("d %d p %d v %d\n", deep, max_pos, max_value);
+    if (deep)
+        return max_value;
+    //printf("max p %d v %d\n", max_pos, max_value);
     return max_pos;
 }
 
