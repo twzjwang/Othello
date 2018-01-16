@@ -45,7 +45,7 @@ void print_board()
         printf("Player");    
     printf("  White\n");   
     printf("\n");
-    printf("History : ");
+    printf("Move : ");
     for (i = 0; i < 2 * (black_score + white_score - 4); i += 2) {
         if (i % 20 == 0)
              printf("\n");   

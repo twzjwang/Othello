@@ -3,14 +3,14 @@
 #include "game.h"
 
 int Deep = 2;
-int valuation_table[64] = {  300, -60, 10, 10, 10, 10, -60,  300,
-                            -60, -200,  5,  5,  5,  5, -200, -60,
+int valuation_table[64] = {  250, -40, 10, 10, 10, 10, -40,  250,
+                            -40, -150,  5,  5,  5,  5, -150, -40,
                              10,   5,  1,  1,  1,  1,   5,  10,
                              10,   5,  1,  1,  1,  1,   5,  10,
                              10,   5,  1,  1,  1,  1,   5,  10,
                              10,   5,  1,  1,  1,  1,   5,  10,
-                            -60, -200,  5,  5,  5,  5, -200, -60,
-                             300, -60, 10, 10, 10, 10, -60,  300};
+                            -40, -150,  5,  5,  5,  5, -150, -40,
+                             250, -40, 10, 10, 10, 10, -40,  250};
 
 //ref http://wsothello.blogspot.tw/2010/07/opening-books.html
 const char opening_book[400][40] = {
@@ -439,6 +439,7 @@ int main()
 {
     int input = 1;
     int d, ai_move;
+    int pre, ct;
     char c;
     printf("Black : (1) Player (2) AI\n");
     scanf("%d", &input);
@@ -463,8 +464,23 @@ int main()
     book_end = 395;
 
     while (!is_gameover) {
+        if (ct > 20) {
+            if(is_black_ai)
+                black_mode = 1;
+            if(is_white_ai)
+                white_mode = 1;
+        }
+        else if (pre == black_score + white_score)
+            ct++;
+        pre = black_score + white_score;
         print_board();
-        if ((black_score + white_score) % 14 == 0)
+        if ((black_score + white_score) == 22)
+            Deep += 2;
+        if ((black_score + white_score) == 36)
+            Deep += 2;
+        if ((black_score + white_score) == 48)
+            Deep += 2;
+        if ((black_score + white_score) == 52)
             Deep += 2;
 
         printf("black %d value %d mobility %d\n", evaluation_function(board, 'x'), evaluated_value(board, 'x'), evaluated_mobility(board, 'x'));
@@ -599,12 +615,13 @@ int absearch(char board[], char color, int deep)
 int evaluation_function(char board[], char color)
 {
     int score, step = black_score + white_score;
+    char reverse_color = (color=='o') ? 'x' : 'o';
     if (color == 'x')
         score = black_score - white_score;
     else
         score = white_score - black_score;
 
-    return evaluated_value(board, color) * step + evaluated_mobility(board, color) * 2 + score * ((step > 55) ? 500 : step);
+    return evaluated_value(board, color) * (step + 20) + (evaluated_mobility(board, color) - evaluated_mobility(board, reverse_color)) * 200 + score * ((step > 56) ? (50 * step) : (step / 2));
 }
 
 //value
